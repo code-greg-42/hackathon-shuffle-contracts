@@ -69,4 +69,21 @@ library VerifyLibrary {
         }
         return result;
     }
+
+    function verifyProof(
+        bytes32 _leaf,
+        bytes32[] memory _proof,
+        uint256[] memory _position,
+        bytes32 _root
+    ) internal pure returns (bool _verified) {
+        bytes32 _data = _leaf;
+        for (uint256 i = 0; i < _proof.length; i++) {
+            if (_position[i] == 0) {
+                _data = keccak256(abi.encodePacked(_data, _proof[i]));
+            } else {
+                _data = keccak256(abi.encodePacked(_proof[i], _data));
+            }
+        }
+        _verified = (_data == _root);
+    }
 }

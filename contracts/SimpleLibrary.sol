@@ -157,4 +157,104 @@ library SimpleLibrary {
             return (false, false, false);
         }
     }
+
+    function checkHandWinner(
+        uint256[7] memory _senderCards,
+        uint256[7] memory _oppCards,
+        uint256 _senderClaimedHand,
+        uint256 _oppClaimedHand
+    ) internal pure returns (bool _wins) {
+        (
+            uint256 _senderScore,
+            uint256 _senderFirstValue,
+            uint256 _senderSecondValue,
+            bool _senderUsingFirstCard
+        ) = checkHand(_senderCards, _senderClaimedHand);
+        (
+            uint256 _oppScore,
+            uint256 _oppFirstValue,
+            uint256 _oppSecondValue,
+            bool _oppUsingFirstCard
+        ) = checkHand(_oppCards, _oppClaimedHand);
+        if (_senderScore == _oppScore) {
+            uint256 _senderVal = _senderUsingFirstCard
+                ? _senderFirstValue
+                : _senderSecondValue;
+            uint256 _oppVal = _oppUsingFirstCard
+                ? _oppFirstValue
+                : _oppSecondValue;
+            _wins = _senderVal > _oppVal;
+        } else {
+            _wins = _senderScore > _oppScore;
+        }
+    }
+
+    function checkHand(uint256[7] memory _cards, uint256 _claimedHand)
+        internal
+        pure
+        returns (
+            uint256,
+            uint256,
+            uint256,
+            bool
+        )
+    {
+        uint256 _handScore;
+        if (_claimedHand == 1) {
+            (
+                uint256 _firstPairCount,
+                uint256 _firstPairValue,
+                uint256 _secondPairCount,
+                uint256 _secondPairValue
+            ) = checkPairs(_cards);
+            if (_firstPairCount == 2 || _secondPairCount == 2) {
+                _handScore = 1;
+            }
+            if (
+                _firstPairCount == 2 &&
+                _secondPairCount == 2 &&
+                _firstPairValue != _secondPairValue
+            ) {
+                _handScore = 2;
+            }
+            if (_firstPairCount == 3 || _secondPairCount == 3) {
+                _handScore = 3;
+            }
+            if (
+                (_firstPairCount == 3 && _secondPairCount == 2) ||
+                (_firstPairCount == 2 && _secondPairCount == 3)
+            ) {
+                _handScore = 5;
+            }
+            if (_firstPairCount == 4 || _secondPairCount == 4) {
+                _handScore = 7;
+            } else {
+                _handScore = 0;
+            }
+            return (
+                _handScore,
+                _firstPairValue,
+                _secondPairValue,
+                _firstPairCount >= _secondPairCount
+            );
+        }
+        if (_claimedHand == 2) {
+            (bool _isStraight, uint256 _highCard) = checkStraight(_cards);
+            if (_isStraight) {
+                return (4, _highCard, 0, false);
+            } else {
+                return (0, 0, 0, false);
+            }
+        }
+        if (_claimedHand == 3) {
+            (bool _isFlush, bool _usesFirst, ) = checkFlush(_cards);
+            if (_isFlush) {
+                return (6, 0, 0, _usesFirst);
+            } else {
+                return (0, 0, 0, false);
+            }
+        } else {
+            return (0, 0, 0, false);
+        }
+    }
 }
