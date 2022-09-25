@@ -1,11 +1,12 @@
 async function main() {
 
-  const shuffleContract = await hre.ethers.getContractFactory("ShuffleContract");
+  const shuffleContract = await hre.ethers.getContractFactory("ShuffleP2P");
   const contract = await shuffleContract.deploy();
-  console.log("Deploying contract...");
+  console.log("Deploying ShuffleP2P contract...");
+  console.log(contract.address);
   await contract.deployed();
 
-  console.log(`Contract deployed to ${contract.address}`);
+  console.log(`ShuffleP2P contract deployed to ${contract.address}`);
 }
 
 main().catch((error) => {
